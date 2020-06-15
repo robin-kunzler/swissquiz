@@ -27,16 +27,17 @@ function generateWebpackConfigForCanister(name, info) {
       index: path.join(inputRoot, info.frontend.entrypoint),
     },
     devtool: "source-map",
-    optimization: {
-      minimize: true,
-      minimizer: [new TerserPlugin()],
-    },
     resolve: {
       alias: aliases,
     },
     output: {
       filename: "[name].js",
       path: path.join(__dirname, info.frontend.output),
+    },
+    module: {
+      rules: [
+        { test: /\.(jsx|ts)?$/, loader: "ts-loader" }
+      ]
     },
     plugins: [
     ],

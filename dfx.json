@@ -9,7 +9,7 @@
         "swissquiz"
       ],
       "frontend": {
-        "entrypoint": "src/swissquiz_assets/public/index.js",
+        "entrypoint": "src/swissquiz_assets/public/index.jsx",
         "output": "canisters/swissquiz_assets/assets"
       },
       "source": [
