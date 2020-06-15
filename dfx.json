@@ -1,0 +1,44 @@
+{
+  "canisters": {
+    "swissquiz": {
+      "main": "src/swissquiz/main.mo",
+      "type": "motoko"
+    },
+    "swissquiz_assets": {
+      "dependencies": [
+        "swissquiz"
+      ],
+      "frontend": {
+        "entrypoint": "src/swissquiz_assets/public/index.js",
+        "output": "canisters/swissquiz_assets/assets"
+      },
+      "source": [
+        "src/swissquiz_assets/assets"
+      ],
+      "type": "assets"
+    },
+    "swissquiz_candid": {
+      "dependencies": [
+        "swissquiz"
+      ],
+      "frontend": {
+        "entrypoint": "src/swissquiz_candid/public/index.js",
+        "output": "canisters/swissquiz_candid/assets"
+      },
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "output": "canisters/",
+      "packtool": ""
+    },
+    "start": {
+      "address": "127.0.0.1",
+      "port": 8000,
+      "serve_root": "canisters/swissquiz_assets/assets"
+    }
+  },
+  "dfx": "0.5.8",
+  "version": 1
+}
