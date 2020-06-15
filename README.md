@@ -1,1 +1,3 @@
-# swissquiz
+# SwissQuiz
+
+Welcome to SwissQuiz!
