@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+      "target": "es2018",        
+      "module": "commonjs",
+      "lib": ["ES2018", "DOM"],  
+      "allowJs": true,           
+      "jsx": "react"
+    }
+}
