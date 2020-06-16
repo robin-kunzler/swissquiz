@@ -1,14 +1,11 @@
 import AssocList "mo:base/AssocList";
-import HashMap "mo:base/HashMap";
 import List "mo:base/List";
 import Nat "mo:base/Nat";
-import Hash "mo:base/Hash";
 import Option "mo:base/Option";
+import Prelude "mo:base/Prelude";
 
 type List<V> = List.List<V>;
-type HashMap<K,V> = HashMap.HashMap<K,V>;
 type AssocList<K,V> = AssocList.AssocList<K,V>;
-type Hash = Hash.Hash;
 
 type GameId = {
     id: Nat;
@@ -42,11 +39,11 @@ type AnswerResult = {
     game_ended: Bool; 
 };
 
-type QuestionId = { 
+type QuestionId = {
     id: Nat;
 };
 
-type Score = { 
+type Score = {
     num_questions: Nat;
     num_correct_answers: Nat;
 };
@@ -157,93 +154,119 @@ var question_10: Question = question(
     "shot the Zurich bailiff named Gessler",
     "still lives today", 
     #A);
-
-var questions: AssocList<QuestionId, Question> = List.fromArray<(QuestionId, Question)>([
-        ({id = 1}, question_1 ),
-        ({id = 2}, question_2 ),
-        ({id = 3}, question_3 ),
-        ({id = 4}, question_4 ),
-        ({id = 5}, question_5 ),
-        ({id = 6}, question_6 ),
-        ({id = 7}, question_7 ),
-        ({id = 8}, question_8 ),
-        ({id = 9}, question_9 ),
-        ({id = 10}, question_10 ),
-    ]);
-
-var static_selected_questions : List<QuestionId> = List.fromArray<QuestionId>([
-        {id = 1},
-        {id = 2}, 
-        {id = 3}, 
-        {id = 4}, 
-        {id = 5}, 
-        {id = 6}, 
-        {id = 7}, 
-        {id = 8}, 
-        {id = 9}, 
-        {id = 10}
-    ]);
+var questions: AssocList<QuestionId, Question> = List.fromArray([
+    ({id = 1}, question_1 ),
+    ({id = 2}, question_2 ),
+    ({id = 3}, question_3 ),
+    ({id = 4}, question_4 ),
+    ({id = 5}, question_5 ),
+    ({id = 6}, question_6 ),
+    ({id = 7}, question_7 ),
+    ({id = 8}, question_8 ),
+    ({id = 9}, question_9 ),
+    ({id = 10}, question_10 ),
+]);
+var static_selected_questions : List<QuestionId> = List.fromArray([
+    {id = 1},
+    {id = 2}, 
+    {id = 3}, 
+    {id = 4}, 
+    {id = 5}, 
+    {id = 6}, 
+    {id = 7}, 
+    {id = 8}, 
+    {id = 9}, 
+    {id = 10}
+]);
 
 // Game Implementation and Actor
 
 class Game (player_name: Text,
   selected_questions: List<QuestionId>) {
     var cur_selected_question_index = 0;
+    var total_num_answers = 0;
+    var total_num_correct_answers = 0;
+    var ended = false; 
 
-    // returns the text of the current question
     public func current_question(): QuestionWithAnswerChoices {
-        let cur_question_id: QuestionId = 
-            Option.unwrap<QuestionId>(
-                List.nth<QuestionId>(selected_questions, cur_selected_question_index)
-            );
-        let question = Option.unwrap<Question>(
-            AssocList.find<QuestionId, Question>(questions, cur_question_id, question_id_eq)
-        );
+        let cur_question_id: QuestionId = Option.unwrap(List.nth(selected_questions, cur_selected_question_index));
+        let question: Question = Option.unwrap(AssocList.find(questions, cur_question_id, question_id_eq));
         question.question_with_answer_choices
+    };
+
+    public func answer_question(answer_id: AnswerId): AnswerResult {
+        let cur_question_id: QuestionId = Option.unwrap(List.nth(selected_questions, cur_selected_question_index));
+        let question: Question = Option.unwrap(AssocList.find(questions, cur_question_id, question_id_eq));
+        let question_was_correct: Bool = eqAnswerId(question.answer, answer_id);    
+        if (question_was_correct and not ended) {
+            total_num_correct_answers += 1;
+        };
+        if (not ended) {
+            total_num_answers += 1;
+        };
+        ended := (cur_selected_question_index + 1) >= List.len(selected_questions);
+        if (not ended) {
+            cur_selected_question_index += 1;
+        };
+        {
+            correct = question_was_correct;
+            correct_answer = question.answer;
+            game_ended = ended; 
+        }
+    };
+
+    // returns the current score, even during the game!
+    public func get_result() : Score {
+        { 
+            num_questions = total_num_answers;
+            num_correct_answers = total_num_correct_answers;
+        }
     };
 
     func question_id_eq(first: QuestionId, second: QuestionId) : Bool {
         first.id == second.id
     };
+
+    func eqAnswerId(a1: AnswerId, a2: AnswerId): Bool {
+        switch (a1, a2) {
+            case (#A, #A) true;
+            case (#B, #B) true;
+            case (#C, #C) true;
+            case (#D, #D) true;
+            case _ false;
+        }
+    };
 };
 
-var games: AssocList<GameId, Game> = List.nil<(GameId, Game)>();
+var games: AssocList<GameId, Game> = List.nil();
 var game_id_counter: Nat = 0;
 
 actor {
     public func start_game(player_name : Text) : async GameId {
         game_id_counter += 1;
         // For now, we allow multiple games for the same player name. 
-        var game = Game(player_name, static_selected_questions);
+        let game = Game(player_name, static_selected_questions);
         let game_id : GameId = {
 		    id = game_id_counter;
 	    };
-        games := List.push<(GameId, Game)>((game_id, game), games);
+        games := List.push((game_id, game), games);
         game_id
     };
 
     public query func current_question(game_id: GameId) : async QuestionWithAnswerChoices {
-        var game: Game = Option.unwrap<Game>(AssocList.find<GameId, Game>(games, game_id,game_id_eq ));
+        let game: Game = Option.unwrap(AssocList.find(games, game_id, game_id_eq));
         game.current_question()
     };
 
     public func answer_question(game_id: GameId, answer: AnswerId): async AnswerResult {
-        // TODO: implement answer_question
-        {
-            correct = true;
-            correct_answer = {#B};
-            game_ended = false; 
-        }
+        let game: Game = Option.unwrap(AssocList.find(games, game_id, game_id_eq));
+        game.answer_question(answer)
     };
 
-    public func get_result(game_id: GameId) : async Score {
-        // TODO: implement get_result
-        { 
-            num_questions = 1;
-            num_correct_answers = 1;
-        }
+    public query func get_result(game_id: GameId) : async Score {
+        let game: Game = Option.unwrap(AssocList.find(games, game_id, game_id_eq));
+        game.get_result()
     };
-
 
     public func greet(name : Text) : async Text {
         return "Hello, " # name # "!";
@@ -252,5 +275,4 @@ actor {
     func game_id_eq(first: GameId, second: GameId) : Bool {
         first.id == second.id
     };
-
 };
