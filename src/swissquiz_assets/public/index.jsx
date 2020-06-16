@@ -53,6 +53,7 @@ class SwissQuiz extends React.Component {
     const score = await swissquiz.get_result(this.state.gameId);
     console.log('score object: ', score);
     console.log('score stringify: ', JSON.stringify(score));
+    this.state.score = score;
     this.setState({ ...this.state, step: 'score' });
   }
 
@@ -80,7 +81,7 @@ class SwissQuiz extends React.Component {
         qa = <QA qa={this.state.qa} ar={this.state.ar} game={this} />;
         break;
       case "score":
-        score = <Score score={null} game={this} />
+        score = <Score score={this.state.score} game={this} />
     }
 
     return (
@@ -186,16 +187,8 @@ class QA extends React.Component {
       this.state.mode = 'choose';
     } else {
       this.state.mode = 'answered';
-      if (this.props.ar.correct) {
-        this.state.correctAnswer = this.state.selected;
-      }
+      this.state.correctAnswer = this.props.ar.correct_answer_text;
       haveNextQuestion = !this.props.ar.game_ended;
-      for (var a of answers) {
-        if (this.props.qa[a].answer_id == this.props.ar.correct_answer) {
-          console.log('correct answer: ', a);
-          this.state.correctAnswer = a;
-        }
-      }
     }
     const inChooseMode = (this.state.mode == 'choose');
 
@@ -248,13 +241,10 @@ class QA extends React.Component {
           </a>
           <br/><br/><br/>
           {renderButton()}
-          <br/><br/><br/>
-          <a href="#" class="button" onClick={() => this.props.game.getScore()}>See Score</a>
       </div>
     );
   }
 }
-
 
 class Score extends React.Component {
   constructor(props) {
@@ -262,13 +252,17 @@ class Score extends React.Component {
   }
 
   render() {
+    var score = this.props.score.high_score
+      .sort(function(a,b) {return b.num_correct_answers - a.num_correct_answers})
+      .map(function(p) {return p.num_correct_answers + ' of 10: ' + p.player_name})
+      .map(function(s){ return <p>{s}</p>; });
     return(
       <div id="score" class="content">
-        Here comes the score...
+        {score}
         <br/><br/><br/>
         <a href="#" class="button" onClick={() => this.props.game.restart()}>Restart Game</a>
       </div>
-      )
+    );
   }
 }
 
