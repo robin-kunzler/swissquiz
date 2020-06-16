@@ -13,8 +13,8 @@ class SwissQuiz extends React.Component {
       nrQuestion: 0,            // count of questions
       step: 'login',            // 'login' | 'question' | 'score'
       qa: null,
-      error: false,
-      errorMessage: ''
+      ar: null,
+      score: null
     };
   }
 
@@ -35,23 +35,52 @@ class SwissQuiz extends React.Component {
 
   async getQuestion() {
     const qa = await swissquiz.current_question(this.state.gameId);
+    this.state.ar = null;
+    this.state.nrQuestion++;
+    console.log('qa object: ', qa);
     this.setState({ ...this.state, qa: qa });
-    this.setState({ ...this.state, nrQuestion: (this.state.nrQuestion + 1) });
     this.setState({ ...this.state, step: 'question' });
+  }
+
+  async checkAnswer(a) {
+    const ar = await swissquiz.answer_question(this.state.gameId, this.state.qa[a].answer_id);
+    console.log('ar object: ', ar);
+    console.log('ar stringify: ', JSON.stringify(ar));
+    this.setState({ ...this.state, ar: ar });
+  }
+
+  async getScore() {
+    const score = await swissquiz.get_result(this.state.gameId);
+    console.log('score object: ', score);
+    console.log('score stringify: ', JSON.stringify(score));
+    this.setState({ ...this.state, step: 'score' });
+  }
+
+  async restart() {
+    this.state.username = '';
+    this.state.gameId = null;
+    this.state.nrQuestion = 0;
+    this.state.qa = null;
+    this.state.ar = null;
+    this.state.score = null;
+    this.setState({ ...this.state, step: 'login' });
   }
 
   render() {
     let status = <Status game={this} />;
     let login = "";
     let qa = "";
+    let score = "";
 
     switch(this.state.step) {
       case "login":
         login = <Login game={this} />;
         break;
       case "question":
-        qa = <QA qa={this.state.qa} />;
+        qa = <QA qa={this.state.qa} ar={this.state.ar} game={this} />;
         break;
+      case "score":
+        score = <Score score={null} game={this} />
     }
 
     return (
@@ -60,8 +89,7 @@ class SwissQuiz extends React.Component {
         {status}
         {login}
         {qa}
-        <div id="score" class="content">Score comes here</div>
-        <div id="error" class="content">Error / Status: gameId={this.getGameId()}</div>
+        {score}
     </div>
     );
   }
@@ -83,7 +111,7 @@ class Status extends React.Component {
         msg = 'Question ' + this.props.game.state.nrQuestion + ' of 10.';
         break;
       case "score":
-        msg = 'The score is...';
+        msg = 'See how you compare to others...';
         break;    
       }
     return (
@@ -135,12 +163,46 @@ class QA extends React.Component {
     }
   }
 
+  callCheck() {
+    if (this.state.selected != '') {
+      console.log('selected in QA: ', this.state.selected);
+      this.props.game.checkAnswer(this.state.selected); 
+    } else {
+      alert('You did not select an answer.');
+    }
+  }
+
+  callNextQuestion() {
+    this.state.selected = '';
+    this.state.correctAnswer = '';
+    this.props.game.getQuestion();
+  }
+
   render() {
     const answers = ['answer_A', 'answer_B', 'answer_C', 'answer_D'];
+    let haveNextQuestion = true;
+
+    if (this.props.ar == null) {
+      this.state.mode = 'choose';
+    } else {
+      this.state.mode = 'answered';
+      if (this.props.ar.correct) {
+        this.state.correctAnswer = this.state.selected;
+      }
+      haveNextQuestion = !this.props.ar.game_ended;
+      for (var a of answers) {
+        if (this.props.qa[a].answer_id == this.props.ar.correct_answer) {
+          console.log('correct answer: ', a);
+          this.state.correctAnswer = a;
+        }
+      }
+    }
+    const inChooseMode = (this.state.mode == 'choose');
+
     let answerClasses = [];
     for (var a of answers) {
       answerClasses[a] = 'answer';
-      if (this.state.mode == 'choose') {
+      if (inChooseMode) {
         if (this.state.selected == a) { 
           answerClasses[a] += ' selected';
         } else {
@@ -154,6 +216,17 @@ class QA extends React.Component {
         }
       }
     }
+
+    const renderButton = () => {
+      if (inChooseMode) {
+        return <a href="#" class="button" onClick={() => this.callCheck()}>Check</a>
+      } else if(haveNextQuestion) {
+        return <a href="#" class="button" onClick={() => this.callNextQuestion()}>Next Question</a>
+      } else {
+        return <a href="#" class="button" onClick={() => this.props.game.getScore()}>See Score</a>
+      }
+    }
+
     return(
         <div id="qa" class="content">
           <div id="question">{this.props.qa.question_text}</div>
@@ -174,15 +247,29 @@ class QA extends React.Component {
               {this.props.qa.answer_D.answer_text}
           </a>
           <br/><br/><br/>
-          <a href="#" class="button">Check</a>
-          <a href="#" class="button">Next Question</a>
+          {renderButton()}
+          <br/><br/><br/>
+          <a href="#" class="button" onClick={() => this.props.game.getScore()}>See Score</a>
       </div>
     );
   }
 }
 
-class Answer extends React.Component {
 
+class Score extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return(
+      <div id="score" class="content">
+        Here comes the score...
+        <br/><br/><br/>
+        <a href="#" class="button" onClick={() => this.props.game.restart()}>Restart Game</a>
+      </div>
+      )
+  }
 }
 
 
