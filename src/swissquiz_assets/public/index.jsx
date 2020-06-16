@@ -27,9 +27,9 @@ class SwissQuiz extends React.Component {
   }
 
   async startGame(username) {
-    console.log("username: ", username);
     const startGame = await swissquiz.start_game(username);
     this.state.gameId = startGame;
+    this.state.username = username;
     await this.getQuestion();
   }
 
@@ -124,28 +124,52 @@ class QA extends React.Component {
     super(props);
     this.state = {
       mode: 'choose',     // 'choose' | 'answered'
-      choosen: '',        // '' | 'answer_A' | 'answer_B' | 'answer_C' | 'answer_D'
+      selected: '',       // '' | 'answer_A' | 'answer_B' | 'answer_C' | 'answer_D'
       correctAnswer: '',  // '' | 'answer_A' | 'answer_B' | 'answer_C' | 'answer_D'
     };
   }
 
+  selectAnswer(a) {
+    if (this.state.mode == 'choose') {
+      this.setState({ ...this.state, selected: a });
+    }
+  }
+
   render() {
+    const answers = ['answer_A', 'answer_B', 'answer_C', 'answer_D'];
+    let answerClasses = [];
+    for (var a of answers) {
+      answerClasses[a] = 'answer';
+      if (this.state.mode == 'choose') {
+        if (this.state.selected == a) { 
+          answerClasses[a] += ' selected';
+        } else {
+          answerClasses[a] += ' selectable';
+        }
+      } else {
+        if (this.state.correctAnswer == a) { 
+          answerClasses[a] += ' correct';
+        } else if (this.state.selected == a) {
+          answerClasses[a] += ' wrong';
+        }
+      }
+    }
     return(
         <div id="qa" class="content">
           <div id="question">{this.props.qa.question_text}</div>
-          <a href="#" id="answerA" class="answer">
+          <a href="#" id="answerA" class={answerClasses['answer_A']} onClick={() => this.selectAnswer('answer_A')}>
               <span class="answerid">A</span>
               {this.props.qa.answer_A.answer_text}
           </a>
-          <a href="#" id="answerB" class="answer selected">
+          <a href="#" id="answerB" class={answerClasses['answer_B']} onClick={() => this.selectAnswer('answer_B')}>
               <span class="answerid">B</span>
               {this.props.qa.answer_B.answer_text}
           </a>
-          <a href="#" id="answerC" class="answer correct">
+          <a href="#" id="answerC" class={answerClasses['answer_C']} onClick={() => this.selectAnswer('answer_C')}>
               <span class="answerid">C</span>
               {this.props.qa.answer_C.answer_text}
           </a>
-          <a href="#" id="answerD" class="answer wrong">
+          <a href="#" id="answerD" class={answerClasses['answer_D']} onClick={() => this.selectAnswer('answer_D')}>
               <span class="answerid">D</span> 
               {this.props.qa.answer_D.answer_text}
           </a>
