@@ -78,12 +78,111 @@ func question(text: Text, answer_1: Text, answer_2: Text, answer_3: Text, answer
     }
 };
 
-var question_1: Question = question("Who is Globi?", "an elephant", "a penguin", "a parrot","a coelacanth", #C);
+var question_1: Question = question(
+    "Who is \"Globi\"?", 
+    "A Federal Council member", 
+    "A nickname for a global leader", 
+    "A Swiss cartoon character",
+    "The Swiss version of Santa", 
+    #C);
+
+var question_2: Question = question(
+    "According to rumors, over what are you walking when you cross the Paradeplatz in Zurich?", 
+    "Over a part of the Roman \"Limes\"", 
+    "Over tons of pure gold", 
+    "Over the grave of the Zurich Reformer Ulrich Zwingli",
+    "Over one of Dfinity's data centers", 
+    #B);
+
+var question_3: Question = question(
+    "How many Cantons does Switzerland have?", 
+    "7", 
+    "24", 
+    "26",
+    "31", 
+    #C);
+
+var question_4: Question = question(
+    "What are the official languages in Switzerland?", 
+    "German", 
+    "German, English", 
+    "German, French, Italian",
+    "German, French, Italian, Romansh", 
+    #D);
+
+var question_5: Question = question(
+    "Since when have there been nationwide voting rights for women in Switzerland?", 
+    "1887", 
+    "1901", 
+    "1968",
+    "1990", 
+    #D);
+
+var question_6: Question = question(
+    "What is the largest lake that lies entirely within Switzerland?", 
+    "Lake Neuchatel", 
+    "Lake Constance (Bodensee)", 
+    "Lake of Geneva",
+    "Lake Zurich", 
+    #A);
+
+var question_7: Question = question(
+    "What is the 'Röstigraben'?", 
+    "A rampart erected in 1527 by the Papal Swiss Guard to protect the Pope from the troops of Karl V", 
+    "A dent for the sauce in the traditional potato dish Rösti", 
+    "A humorous term used to refer to the cultural boundary between German-speaking and French-speaking parts of Switzerland.",
+    "A ditch for the sauce in the traditional potato dish Rösti. The sauce flows off the plate on both ends of the ditch.", 
+    #C);
+
+var question_8: Question = question(
+    "In the Swiss Federal Council (German: \"Bundesrat\"):", 
+    "All parties are represented", 
+    "Only three parties are allowed", 
+    "Most Federal Councils are not members of a party",
+    "At least 3 out of the 7 members must be women", 
+    #A);
+
+var question_9: Question = question(
+    "Which invention was not made in Switzerland? ", 
+    "LSD (Lysergic acid diethylamide)", 
+    "Chocolate", 
+    "Potato peeler",
+    "Ricola (cough drops / candy made from Swiss herbs)", 
+    #B);
+
+var question_10: Question = question(
+    "The Swiss national hero Wilhelm Tell:", 
+    "actually never lived", 
+    "is the founder of the Swiss state", 
+    "shot the Zurich bailiff named Gessler",
+    "still lives today", 
+    #A);
 
 var questions: AssocList<QuestionId, Question> = List.fromArray<(QuestionId, Question)>([
         ({id = 1}, question_1 ),
+        ({id = 2}, question_2 ),
+        ({id = 3}, question_3 ),
+        ({id = 4}, question_4 ),
+        ({id = 5}, question_5 ),
+        ({id = 6}, question_6 ),
+        ({id = 7}, question_7 ),
+        ({id = 8}, question_8 ),
+        ({id = 9}, question_9 ),
+        ({id = 10}, question_10 ),
     ]);
-var static_selected_questions : List<QuestionId> = List.fromArray<QuestionId>([{id = 1}]);
+
+var static_selected_questions : List<QuestionId> = List.fromArray<QuestionId>([
+        {id = 1},
+        {id = 2}, 
+        {id = 3}, 
+        {id = 4}, 
+        {id = 5}, 
+        {id = 6}, 
+        {id = 7}, 
+        {id = 8}, 
+        {id = 9}, 
+        {id = 10}
+    ]);
 
 // Game Implementation and Actor
 
