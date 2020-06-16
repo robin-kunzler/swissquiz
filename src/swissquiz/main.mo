@@ -36,6 +36,7 @@ type Question = {
 type AnswerResult = {
     correct: Bool;
     correct_answer: AnswerId; 
+    correct_answer_text: Text;
     game_ended: Bool; 
 };
 
@@ -226,9 +227,16 @@ class Game (id: GameId, player_name: Text,
             };
             ended := is_last_question;
         };
+        let answer_text = switch (question.answer)  {
+            case (#A) "answer_A";
+            case (#B) "answer_B";
+            case (#C) "answer_C";
+            case (#D) "answer_D";
+        }; 
         {
             correct = question_was_correct;
             correct_answer = question.answer;
+            correct_answer_text = answer_text;
             game_ended = ended; 
         }
     };
@@ -286,10 +294,6 @@ actor {
     public query func get_result(game_id: GameId) : async Score {
         let game: Game = Option.unwrap(AssocList.find(games, game_id, game_id_eq));
         game.get_result()
-    };
-
-    public func greet(name : Text) : async Text {
-        return "Hello, " # name # "!";
     };
 
     func game_id_eq(first: GameId, second: GameId) : Bool {
