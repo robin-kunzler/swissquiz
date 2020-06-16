@@ -23,12 +23,17 @@ type AnswerId = {
     #A; #B; #C; #D;
 };
 
-type Question = {
+type QuestionWithAnswerChoices = {
     question_text: Text; 
     answer_A: Answer; 
     answer_B: Answer; 
     answer_C: Answer; 
     answer_D: Answer; 
+};
+
+type Question = {
+    question_with_answer_choices: QuestionWithAnswerChoices;
+    answer: AnswerId;
 };
 
 type AnswerResult = {
@@ -48,29 +53,32 @@ type Score = {
 
 // Question Definitions
 
-func question(text: Text, answer_1: Text, answer_2: Text, answer_3: Text, answer_4: Text) : Question {
+func question(text: Text, answer_1: Text, answer_2: Text, answer_3: Text, answer_4: Text, answer_id: AnswerId) : Question {
     {
-        question_text = text;
-        answer_A = {
-            answer_text = answer_1;
-            answer_id = #A; 
-        }; 
-        answer_B = {
-            answer_text = answer_2;
-            answer_id = #B; 
-        }; 
-        answer_C = {
-            answer_text = answer_3;
-            answer_id = #C; 
-        }; 
-        answer_D = {
-            answer_text = answer_4;
-            answer_id = #D; 
-        }; 
+        question_with_answer_choices = {
+            question_text = text;
+            answer_A = {
+                answer_text = answer_1;
+                answer_id = #A; 
+            }; 
+            answer_B = {
+                answer_text = answer_2;
+                answer_id = #B; 
+            }; 
+            answer_C = {
+                answer_text = answer_3;
+                answer_id = #C; 
+            }; 
+            answer_D = {
+                answer_text = answer_4;
+                answer_id = #D; 
+            }; 
+        };
+        answer = answer_id;
     }
 };
 
-var question_1: Question = question("Who is Globi?", "an elephant", "a penguin", "a parrot","a coelacanth");
+var question_1: Question = question("Who is Globi?", "an elephant", "a penguin", "a parrot","a coelacanth", #C);
 
 var questions: AssocList<QuestionId, Question> = List.fromArray<(QuestionId, Question)>([
         ({id = 1}, question_1 ),
@@ -84,14 +92,15 @@ class Game (player_name: Text,
     var cur_selected_question_index = 0;
 
     // returns the text of the current question
-    public func current_question(): Question {
+    public func current_question(): QuestionWithAnswerChoices {
         let cur_question_id: QuestionId = 
             Option.unwrap<QuestionId>(
                 List.nth<QuestionId>(selected_questions, cur_selected_question_index)
             );
-        Option.unwrap<Question>(
+        let question = Option.unwrap<Question>(
             AssocList.find<QuestionId, Question>(questions, cur_question_id, question_id_eq)
-        )
+        );
+        question.question_with_answer_choices
     };
 
     func question_id_eq(first: QuestionId, second: QuestionId) : Bool {
@@ -114,7 +123,7 @@ actor {
         game_id
     };
 
-    public query func current_question(game_id: GameId) : async Question {
+    public query func current_question(game_id: GameId) : async QuestionWithAnswerChoices {
         var game: Game = Option.unwrap<Game>(AssocList.find<GameId, Game>(games, game_id,game_id_eq ));
         game.current_question()
     };
