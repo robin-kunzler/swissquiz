@@ -14,8 +14,7 @@ class SwissQuiz extends React.Component {
       step: 'login',            // 'login' | 'question' | 'score'
       qa: null,
       ar: null,
-      error: false,
-      errorMessage: ''
+      score: null
     };
   }
 
@@ -50,10 +49,28 @@ class SwissQuiz extends React.Component {
     this.setState({ ...this.state, ar: ar });
   }
 
+  async getScore() {
+    const score = await swissquiz.get_result(this.state.gameId);
+    console.log('score object: ', score);
+    console.log('score stringify: ', JSON.stringify(score));
+    this.setState({ ...this.state, step: 'score' });
+  }
+
+  async restart() {
+    this.state.username = '';
+    this.state.gameId = null;
+    this.state.nrQuestion = 0;
+    this.state.qa = null;
+    this.state.ar = null;
+    this.state.score = null;
+    this.setState({ ...this.state, step: 'login' });
+  }
+
   render() {
     let status = <Status game={this} />;
     let login = "";
     let qa = "";
+    let score = "";
 
     switch(this.state.step) {
       case "login":
@@ -62,6 +79,8 @@ class SwissQuiz extends React.Component {
       case "question":
         qa = <QA qa={this.state.qa} ar={this.state.ar} game={this} />;
         break;
+      case "score":
+        score = <Score score={null} game={this} />
     }
 
     return (
@@ -70,8 +89,7 @@ class SwissQuiz extends React.Component {
         {status}
         {login}
         {qa}
-        <div id="score" class="content">Score comes here</div>
-        <div id="error" class="content">Error / Status: gameId={this.getGameId()}</div>
+        {score}
     </div>
     );
   }
@@ -93,7 +111,7 @@ class Status extends React.Component {
         msg = 'Question ' + this.props.game.state.nrQuestion + ' of 10.';
         break;
       case "score":
-        msg = 'The score is...';
+        msg = 'See how you compare to others...';
         break;    
       }
     return (
@@ -205,7 +223,7 @@ class QA extends React.Component {
       } else if(haveNextQuestion) {
         return <a href="#" class="button" onClick={() => this.callNextQuestion()}>Next Question</a>
       } else {
-        return 'SHOW HIGHSCORE'
+        return <a href="#" class="button" onClick={() => this.props.game.getScore()}>See Score</a>
       }
     }
 
@@ -230,11 +248,29 @@ class QA extends React.Component {
           </a>
           <br/><br/><br/>
           {renderButton()}
+          <br/><br/><br/>
+          <a href="#" class="button" onClick={() => this.props.game.getScore()}>See Score</a>
       </div>
     );
   }
 }
 
+
+class Score extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return(
+      <div id="score" class="content">
+        Here comes the score...
+        <br/><br/><br/>
+        <a href="#" class="button" onClick={() => this.props.game.restart()}>Restart Game</a>
+      </div>
+      )
+  }
+}
 
 
 document.title = "Play SwissQuiz";
