@@ -5,6 +5,7 @@ Answer ten questions about Switzerland on a beautiful web UI and make it to the 
 Please find all documentation [here](https://www.notion.so/SwissQuiz-dc35bbea4ebf40ce9e7ec9bf0353abf8).
 
 ## How to Start the App
+* `npm install`
 * `dfx start`
 * `dfx build`
 * `dfx canister install --all`
