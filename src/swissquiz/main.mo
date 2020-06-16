@@ -43,9 +43,17 @@ type QuestionId = {
     id: Nat;
 };
 
+type HighScoreEntry = {
+    game_id: GameId;
+    player_name: Text;
+    num_questions: Nat;
+    num_correct_answers: Nat;
+};
+
 type Score = {
     num_questions: Nat;
     num_correct_answers: Nat;
+    high_score: [HighScoreEntry];
 };
 
 // Question Definitions
@@ -181,7 +189,7 @@ var static_selected_questions : List<QuestionId> = List.fromArray([
 
 // Game Implementation and Actor
 
-class Game (player_name: Text,
+class Game (id: GameId, player_name: Text,
   selected_questions: List<QuestionId>) {
     var cur_selected_question_index = 0;
     var total_num_answers = 0;
@@ -198,15 +206,25 @@ class Game (player_name: Text,
         let cur_question_id: QuestionId = Option.unwrap(List.nth(selected_questions, cur_selected_question_index));
         let question: Question = Option.unwrap(AssocList.find(questions, cur_question_id, question_id_eq));
         let question_was_correct: Bool = eqAnswerId(question.answer, answer_id);    
-        if (question_was_correct and not ended) {
-            total_num_correct_answers += 1;
-        };
+        let is_last_question = ((cur_selected_question_index + 1) >= List.len(selected_questions));
         if (not ended) {
             total_num_answers += 1;
-        };
-        ended := (cur_selected_question_index + 1) >= List.len(selected_questions);
-        if (not ended) {
-            cur_selected_question_index += 1;
+            if (question_was_correct) {
+                total_num_correct_answers += 1;
+            };
+            if (is_last_question) {
+                let name = player_name; 
+                var high_score_entry : HighScoreEntry = {
+                        game_id = id;
+                        player_name = name;
+                        num_questions = total_num_answers;
+                        num_correct_answers=total_num_correct_answers;
+                    };
+                high_score_entries := List.push(high_score_entry, high_score_entries);
+            } else {
+                cur_selected_question_index += 1;
+            };
+            ended := is_last_question;
         };
         {
             correct = question_was_correct;
@@ -216,10 +234,11 @@ class Game (player_name: Text,
     };
 
     // returns the current score, even during the game!
-    public func get_result() : Score {
+    public func get_result() : Score {       
         { 
             num_questions = total_num_answers;
             num_correct_answers = total_num_correct_answers;
+            high_score = List.toArray(high_score_entries); 
         }
     };
 
@@ -238,17 +257,18 @@ class Game (player_name: Text,
     };
 };
 
+var high_score_entries: List<HighScoreEntry> = List.nil();
 var games: AssocList<GameId, Game> = List.nil();
 var game_id_counter: Nat = 0;
 
 actor {
     public func start_game(player_name : Text) : async GameId {
         game_id_counter += 1;
-        // For now, we allow multiple games for the same player name. 
-        let game = Game(player_name, static_selected_questions);
         let game_id : GameId = {
 		    id = game_id_counter;
 	    };
+        // For now, we allow multiple games for the same player name. 
+        let game = Game(game_id, player_name, static_selected_questions);
         games := List.push((game_id, game), games);
         game_id
     };
