@@ -142,7 +142,7 @@ var question_7: Question = question(
 
 var question_8: Question = question(
     "In the Swiss Federal Council (German: \"Bundesrat\"):", 
-    "All parties are represented", 
+    "A magic formula defines how many seats a party gets", 
     "Only three parties are allowed", 
     "Most Federal Councils are not members of a party",
     "At least 3 out of the 7 members must be women", 
@@ -158,7 +158,7 @@ var question_9: Question = question(
 
 var question_10: Question = question(
     "The Swiss national hero Wilhelm Tell:", 
-    "actually never lived", 
+    "may never have lived: there are no historic sources that prove his existence", 
     "is the founder of the Swiss state", 
     "shot the Zurich bailiff named Gessler",
     "still lives today", 
