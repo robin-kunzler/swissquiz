@@ -6,7 +6,7 @@ Please find all documentation [here](https://www.notion.so/SwissQuiz-dc35bbea4eb
 
 ## How to Start the App
 * `npm install` (ignore the `gyp` errors)
-* `dfx start`
+* In a second terminal: `dfx start`
 * `dfx build`
 * `dfx canister install --all`
 * [Web UI](http://127.0.0.1:8000/?canisterId=ic:02000000000000000000000000000000000153) (use swissquiz_assets' canister id in this URL)
