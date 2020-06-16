@@ -2,6 +2,11 @@
   "name": "swissquiz_assets",
   "version": "0.1.0",
   "description": "",
+  "license": "(MIT)",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/robin-kunzler/swissquiz.git"
+  },
   "keywords": [],
   "scripts": {
     "build": "webpack"
