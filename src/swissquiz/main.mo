@@ -15,17 +15,69 @@ type GameId = {
 };
 
 type Answer = {
+    answer_text: Text; 
+    answer_id: AnswerId; 
+};
+
+type AnswerId = {
     #A; #B; #C; #D;
 };
 
 type Question = {
     question_text: Text; 
-    answers: AssocList<Answer, Text>;
+    answer_A: Answer; 
+    answer_B: Answer; 
+    answer_C: Answer; 
+    answer_D: Answer; 
+};
+
+type AnswerResult = {
+    correct: Bool;
+    correct_answer: AnswerId; 
+    game_ended: Bool; 
 };
 
 type QuestionId = { 
     id: Nat;
 };
+
+type Score = { 
+    num_questions: Nat;
+    num_correct_answers: Nat;
+};
+
+// Question Definitions
+
+func question(text: Text, answer_1: Text, answer_2: Text, answer_3: Text, answer_4: Text) : Question {
+    {
+        question_text = text;
+        answer_A = {
+            answer_text = answer_1;
+            answer_id = #A; 
+        }; 
+        answer_B = {
+            answer_text = answer_2;
+            answer_id = #B; 
+        }; 
+        answer_C = {
+            answer_text = answer_3;
+            answer_id = #C; 
+        }; 
+        answer_D = {
+            answer_text = answer_4;
+            answer_id = #D; 
+        }; 
+    }
+};
+
+var question_1: Question = question("Who is Globi?", "an elephant", "a penguin", "a parrot","a coelacanth");
+
+var questions: AssocList<QuestionId, Question> = List.fromArray<(QuestionId, Question)>([
+        ({id = 1}, question_1 ),
+    ]);
+var static_selected_questions : List<QuestionId> = List.fromArray<QuestionId>([{id = 1}]);
+
+// Game Implementation and Actor
 
 class Game (player_name: Text,
   selected_questions: List<QuestionId>) {
@@ -47,34 +99,14 @@ class Game (player_name: Text,
     };
 };
 
-var question_1_answers = List.fromArray<(Answer, Text)>(
-    [
-        (#A, "answer A"), 
-        (#B, "answer B"), 
-        (#C, "answer C"), 
-        (#D, "answer D"), 
-    ]
-);
-
-var question_1 : Question = {
-    question_text = "sample question text";
-    answers= question_1_answers
-};
-
-var question_id_1 : QuestionId = {id = 1};
-
-var questions: AssocList<QuestionId, Question> = List.fromArray<(QuestionId, Question)>([
-        (question_id_1, question_1 ),
-    ]);
-
 var games: AssocList<GameId, Game> = List.nil<(GameId, Game)>();
-
 var game_id_counter: Nat = 0;
 
 actor {
     public func start_game(player_name : Text) : async GameId {
         game_id_counter += 1;
-        var game = Game( player_name, List.fromArray<QuestionId>([question_id_1]));
+        // For now, we allow multiple games for the same player name. 
+        var game = Game(player_name, static_selected_questions);
         let game_id : GameId = {
 		    id = game_id_counter;
 	    };
@@ -86,6 +118,24 @@ actor {
         var game: Game = Option.unwrap<Game>(AssocList.find<GameId, Game>(games, game_id,game_id_eq ));
         game.current_question()
     };
+
+    public func answer_question(game_id: GameId, answer: AnswerId): async AnswerResult {
+        // TODO: implement answer_question
+        {
+            correct = true;
+            correct_answer = {#B};
+            game_ended = false; 
+        }
+    };
+
+    public func get_result(game_id: GameId) : async Score {
+        // TODO: implement get_result
+        { 
+            num_questions = 1;
+            num_correct_answers = 1;
+        }
+    };
+
 
     public func greet(name : Text) : async Text {
         return "Hello, " # name # "!";
