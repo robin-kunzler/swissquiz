@@ -11,6 +11,7 @@ class SwissQuiz extends React.Component {
       username: 'Username',     // to be provided by the user
       gameIdRaw: null,          // value received by canister
       gameId: 0,                // returned from IC
+      nrQuestion: 0,                // returned from IC
       step: 'login',            // 'login' | 'question' | 'score'
       qa: {
         question: '',
@@ -28,41 +29,32 @@ class SwissQuiz extends React.Component {
     };
   }
 
-  async startGame() {
-    const startGame = await swissquiz.start_game(this.state.username);
+  async startGame(username) {
+    console.log("username: ", username);
+    const startGame = await swissquiz.start_game("Samuel");
     console.log('GameId object: ', startGame);
     console.log('toNumber', startGame.id.toNumber());
     console.log('strigified: ', JSON.stringify(startGame));
+    /*
     this.setState({ ...this.state, gameIdRaw: startGame });
     this.setState({ ...this.state, gameId: startGame.id.toNumber() });
-    this.setState({ ...this.state, step: 'question' });
-    const currentQuestion = await swissquiz.current_question(startGame);
-    console.log('Question object: ', currentQuestion);
-  }
-
-  onUsernameChange(ev) {
-    this.setState({ ...this.state, username: ev.target.value });
+    */
+   this.setState({ ...this.state, step: 'question' });
   }
 
   render() {
-    let qa;
-    if (this.state.step == "question") {
-      qa = <QA />;
-    } else {
-      qa = "";
+    let status = <Status game={this} />;
+    let login = "";
+    switch(this.state.step) {
+      case "login":
+        login = <Login game={this} />;
     }
+
     return (
       <div id="main">
         <div id="title">Welcome to SwissQuiz 🇨🇭</div>
-        <div id="status" class="content">Provide your name and start playing...</div>
-        <div id="login" class="content">
-            <input
-              id="username" 
-              value={this.state.username}
-              onChange={ev => this.onUsernameChange(ev)}
-            ></input>
-            <a class="button" onClick={() => this.startGame()}>Start Game</a>
-        </div>
+        {status}
+        {login}
         <div id="qa" class="content">
             <div id="question">Who is "Globi"?</div>
             <a href="#" id="answerA" class="answer">
@@ -92,13 +84,62 @@ class SwissQuiz extends React.Component {
   }
 }
 
-class QA extends React.Component {
+
+class Status extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
   render() {
+    let msg='';
+    switch(this.props.game.state.step) {
+      case "login":
+        msg = 'Provide your name and start playing...';
+        break;
+      case "question":
+        msg = 'Question ' + this.props.game.state.nrQuestion + ' of 10.';
+        break;
+      case "score":
+        msg = 'The score is...';
+        break;    
+      }
     return (
-      <div><span style={{ "color": "blue" }}>Here comes the great question.</span></div>
+      <div id="status" class="content">{msg}</div>
     );
   }
 }
+
+class Login extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      username: '',
+    };
+  }
+
+  onUsernameChange(ev) {
+    this.setState({ ...this.state, username: ev.target.value });
+  }
+
+  render() {
+    return (
+      <div id="login" class="content">
+            <input
+              id="username" 
+              value={this.state.username}
+              onChange={ev => this.onUsernameChange(ev)}
+            ></input>
+            <a class="button" onClick={() => this.props.game.startGame(this.state.username)}>Start Game!</a>
+        </div>
+    );
+  }
+}
+
+
+class Answer extends React.Component {
+
+}
+
 
 document.title = "Play SwissQuiz";
 
