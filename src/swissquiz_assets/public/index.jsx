@@ -141,7 +141,7 @@ class Login extends React.Component {
               value={this.state.username}
               onChange={ev => this.onUsernameChange(ev)}
             ></input>
-            <a class="button" onClick={() => this.props.game.startGame(this.state.username)}>Start Game!</a>
+            <a href="#" class="button" onClick={() => this.props.game.startGame(this.state.username)}>Start Game!</a>
         </div>
     );
   }
