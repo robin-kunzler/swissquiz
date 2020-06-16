@@ -1,19 +1,12 @@
-# swissquiz
+# SwissQuiz
 
-Welcome to your new swissquiz project and to the internet computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.
+Answer ten questions about Switzerland on a beautiful web UI and make it to the top of the SwissQuiz high score!
 
-To get started, you might want to explore the project directory structure and the default configuration file. Working with this project in your development environment will not affect any production deployment or identity tokens.
+Please find all documentation [here](https://www.notion.so/SwissQuiz-dc35bbea4ebf40ce9e7ec9bf0353abf8).
 
-To learn more before you start working with swissquiz, see the following documentation available online:
-
-- [Quick Start](https://sdk.dfinity.org/developers-guide/quickstart.html)
-- [Developer's Guide](https://sdk.dfinity.org/developers-guide)
-- [Language Reference](https://sdk.dfinity.org/language-guide)
-
-If you want to start working on your project right away, you might want to try the following commands:
-
-```bash
-cd swissquiz/
-dfx help
-dfx config --help
-```
+## How to Start the App
+* `dfx start`
+* `dfx build`
+* `dfx canister install --all`
+* [Web UI](http://127.0.0.1:8000/?canisterId=ic:02000000000000000000000000000000000153) (use swissquiz_assets' canister id in this URL)
+* [Candid](http://127.0.0.1:8000/?canisterId=ic:03000000000000000000000000000000000179) (use the swissquiz_candid's canister id in this URL)
