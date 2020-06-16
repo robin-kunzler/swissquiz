@@ -69,7 +69,7 @@ a.answer {
     margin-top: 10px;
 }
 
-a.answer:hover {
+a.selectable:hover {
     background-color:#e4d7d7;
 }
 
