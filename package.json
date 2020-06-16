@@ -4,8 +4,8 @@
   "description": "",
   "license": "(MIT)",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/robin-kunzler/swissquiz.git"
+    "type": "git",
+    "url": "https://github.com/robin-kunzler/swissquiz.git"
   },
   "keywords": [],
   "scripts": {
