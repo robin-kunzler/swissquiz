@@ -2,32 +2,42 @@ import swissquiz from 'ic:canisters/swissquiz';
 import * as React from 'react';
 import { render } from 'react-dom';
 
+import './styles.css';
+
 class SwissQuiz extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: 'Name',
-      message: '',
-      username: 'Username',
-      gameId: 0,
+      username: 'Username',     // to be provided by the user
+      gameIdRaw: null,          // value received by canister
+      gameId: 0,                // returned from IC
+      step: 'login',            // 'login' | 'question' | 'score'
+      qa: {
+        question: '',
+        answers: {
+          A: '',
+          B: '',
+          C: '',
+          D: ''
+        },
+        selectedAnswer: '',
+        correctAnswer: ''
+      },
+      error: false,
+      errorMessage: ''
     };
   }
 
-  async doGreet() {
-    const greeting = await swissquiz.greet(this.state.name);
-    this.setState({ ...this.state, message: greeting });
-  }
-
-  async doStartGame() {
+  async startGame() {
     const startGame = await swissquiz.start_game(this.state.username);
-    console.log('object: ', startGame);
+    console.log('GameId object: ', startGame);
     console.log('toNumber', startGame.id.toNumber());
     console.log('strigified: ', JSON.stringify(startGame));
+    this.setState({ ...this.state, gameIdRaw: startGame });
     this.setState({ ...this.state, gameId: startGame.id.toNumber() });
-  }
-
-  onNameChange(ev) {
-    this.setState({ ...this.state, name: ev.target.value });
+    this.setState({ ...this.state, step: 'question' });
+    const currentQuestion = await swissquiz.current_question(startGame);
+    console.log('Question object: ', currentQuestion);
   }
 
   onUsernameChange(ev) {
@@ -35,24 +45,61 @@ class SwissQuiz extends React.Component {
   }
 
   render() {
+    let qa;
+    if (this.state.step == "question") {
+      qa = <QA />;
+    } else {
+      qa = "";
+    }
     return (
-      <div style={{ "font-size": "30px" }}>
-        <div style={{ "background-color": "yellow" }}>
-          <p>SwissQuiz</p>
+      <div id="main">
+        <div id="title">Welcome to SwissQuiz 🇨🇭</div>
+        <div id="status" class="content">Provide your name and start playing...</div>
+        <div id="login" class="content">
+            <input
+              id="username" 
+              value={this.state.username}
+              onChange={ev => this.onUsernameChange(ev)}
+            ></input>
+            <a class="button" onClick={() => this.startGame()}>Start Game</a>
         </div>
-        <div style={{ "margin": "30px" }}>
-          <input id="name" value={this.state.name} onChange={ev => this.onNameChange(ev)}></input>
-          <button onClick={() => this.doGreet()}>Say Hello</button>
+        <div id="qa" class="content">
+            <div id="question">Who is "Globi"?</div>
+            <a href="#" id="answerA" class="answer">
+                <span class="answerid">A</span>
+                A Federal Council member
+            </a>
+            <a href="#" id="answerB" class="answer selected">
+                <span class="answerid">B</span>
+                A nickname for a global leader
+            </a>
+            <a href="#" id="answerC" class="answer correct">
+                <span class="answerid">C</span>
+                A Swiss cartoon character
+            </a>
+            <a href="#" id="answerD" class="answer wrong">
+                <span class="answerid">D</span> 
+                The Swiss version of santa
+            </a>
+            <br/><br/><br/>
+            <a href="#" class="button">Check</a>
+            <a href="#" class="button">Next Question</a>
         </div>
-        <div>Greeting is: "<span style={{ "color": "blue" }}>{this.state.message}</span>"</div>
-        <div style={{ "margin": "30px" }}>
-          <input id="username" value={this.state.username} onChange={ev => this.onUsernameChange(ev)}></input>
-          <button onClick={() => this.doStartGame()}>Start Game</button>
-        </div>
-        <div>GameId is "<span style={{ "color": "blue" }}>{this.state.gameId}</span>"</div>
-      </div>
+        <div id="score" class="content">Score comes here</div>
+        <div id="error" class="content">Error / Status: gameId={this.state.gameId}</div>
+    </div>
     );
   }
 }
+
+class QA extends React.Component {
+  render() {
+    return (
+      <div><span style={{ "color": "blue" }}>Here comes the great question.</span></div>
+    );
+  }
+}
+
+document.title = "Play SwissQuiz";
 
 render(<SwissQuiz />, document.getElementById('app'));
